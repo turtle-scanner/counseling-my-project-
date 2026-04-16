@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>상담교사 합격 시스템 - 거북이투자전문가 전용 🐢</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Seeking Alpha 화이트 카드 레이아웃 & 큰 폰트 (ADHD 최적화) */
+        :root {
+            --bg: #f4f5f8;
+            --card-space: #ffffff;
+            --text-dark: #111827;
+            --text-gray: #4b5563;
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --border: #e5e7eb;
+            --red: #ef4444;
+            --green: #10b981;
+        }
+
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-dark);
+            margin: 0;
+            padding: 30px 15px;
+            font-size: 18px; /* 가독성 향상 */
+            line-height: 1.6;
+        }
+
+        .container { max-width: 800px; margin: 0 auto; }
+
+        .card {
+            background: var(--card-space);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .btn {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 16px 24px;
+            font-size: 20px;
+            font-weight: 700;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            transition: 0.2s;
+        }
+
+        .btn:hover { background: var(--primary-hover); }
+
+        .input-box {
+            width: 100%;
+            padding: 18px;
+            font-size: 18px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            box-sizing: border-box;
+            background-color: #f9fafb;
+            font-family: inherit;
+        }
+
+        .input-box:focus {
+            outline: none;
+            border-color: var(--primary);
+            background-color: #fff;
+        }
+
+        textarea.input-box { height: 180px; resize: vertical; }
+
+        .hide { display: none !important; }
+
+        .tag {
+            background: #dbeafe;
+            color: var(--primary);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 16px;
+            display: inline-block;
+            margin-bottom: 12px;
+        }
+
+        .question-text {
+            font-size: 22px;
+            font-weight: 700;
+            margin-top: 16px;
+            margin-bottom: 24px;
+            color: var(--text-dark);
+        }
+
+        .case-box {
+            background: #f3f4f6;
+            border-left: 5px solid var(--primary);
+            padding: 20px;
+            border-radius: 4px;
+            font-size: 18px;
+            color: var(--text-dark);
+        }
+
+        .chart-box { height: 280px; width: 100%; margin-top: 16px; }
+
+        .feedback-area {
+            margin-top: 24px;
+            padding: 24px;
+            border-radius: 8px;
+            border: 2px solid var(--border);
+        }
+
+        .score-huge { font-size: 32px; font-weight: 800; color: var(--primary); }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- 1. 보안 영역 -->
+    <div id="login-sec" class="card" style="text-align:center; max-width: 400px; margin: 10vh auto;">
+        <h1 style="font-size: 36px; margin: 0 0 16px;">🔐 시스템 접속</h1>
+        <p style="color: var(--text-gray); margin-bottom: 24px;">거북이투자전문가 전용 접속 (비밀번호 필요)</p>
+        <input type="password" id="pwd" class="input-box" placeholder="비밀번호 입력 (2027pass)" style="margin-bottom: 16px; text-align: center;" onkeypress="if(event.key==='Enter') login()">
+        <button class="btn" onclick="login()">접속하기</button>
+    </div>
+
+    <!-- 2. 메인 대시보드 -->
+    <div id="main-sec" class="hide">
+        <!-- 상단 헤더 -->
+        <div class="card" style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+                <h1 style="margin: 0;">🐢 거북이투자전문가 합격 랩</h1>
+                <p style="margin: 0; color: var(--text-gray); font-weight: 600;">총 <span id="study-count">0</span>회 학습 완료 (누적)</p>
+            </div>
+            <button onclick="logout()" style="padding: 10px 16px; font-size: 16px; border:1px solid #ccc; background:#fff; border-radius:6px; cursor:pointer; font-weight: bold;">로그아웃</button>
+        </div>
+
+        <!-- 성적 RS 지수 차트 -->
+        <div class="card">
+            <h2>📈 상담 합격 RS 지수 (Relative Strength)</h2>
+            <div class="chart-box">
+                <canvas id="rsChart"></canvas>
+            </div>
+        </div>
+
+        <!-- 출제 & 답안 -->
+        <div class="card">
+            <h2 style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                <span>🎯 실전 사례 분석 (Random)</span>
+                <button class="btn" style="width: auto; padding: 10px 20px; font-size: 16px;" onclick="loadQuestion()">새 문제 뽑기 ↻</button>
+            </h2>
+
+            <!-- 문제 표시 -->
+            <div id="q-container" style="margin-bottom: 24px;">
+                <span class="tag" id="q-theory">이론명 표출</span>
+                <div class="case-box">
+                    <strong style="display:block; margin-bottom: 8px;">[임상 사례]</strong>
+                    <span id="q-case" style="line-height: 1.8;"></span>
+                </div>
+                <div class="question-text">
+                    <span style="color:var(--primary);">Q.</span> <span id="q-ask"></span>
+                </div>
+            </div>
+
+            <!-- 답안 입력 -->
+            <textarea id="answer" class="input-box" placeholder="핵심 전문용어(Keyword)를 반드시 포함하여 작성하세요..." style="margin-bottom: 16px;"></textarea>
+            <button class="btn" id="submit-btn" onclick="grade()">답안 제출 및 로직 채점</button>
+
+            <!-- 채점 피드백 -->
+            <div id="feedback" class="feedback-area hide">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <h3 style="margin:0;">📝 AI 채점 결과</h3>
+                    <div class="score-huge"><span id="score">0</span> / 100점</div>
+                </div>
+                
+                <p style="margin-bottom: 8px; font-weight: 700;">필수 키워드 매칭결과:</p>
+                <div id="kw-list" style="margin-bottom: 24px;"></div>
+
+                <div style="background: #fdf5f5; padding: 16px; border-left: 4px solid var(--red); border-radius: 4px;" id="feedback-harsh"></div>
+                <div style="background: #f0fdf4; padding: 16px; border-left: 4px solid var(--green); border-radius: 4px;" id="feedback-good" class="hide">합격자 수준의 완벽한 답안입니다! 핵심 개념을 정확히 이해하고 있습니다.</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 1. 노트북LM JSON 데이터 삽입 영역
+    // ⬇️ 노트북LM에서 복사한 데이터를 이 questionBank 배열에 덮어쓰기 하시면 됩니다.
+    const questionBank = [
+      {
+        "theory": "현실치료 (WDEP 모델 및 선택이론)",
+        "case": "지훈(중2, 남)은 부모님과 친구들에게 인정받기 위해 성적을 올리고 싶어 하지만, 매일 방과 후 피시방에 가서 게임을 하느라 공부를 하지 않는다. 지훈이는 '공부해야 하는 건 아는데, 게임이 너무 재미있어서 멈출 수가 없어요'라고 말한다. 이에 상담교사는 '지훈아, 지금 네가 피시방에서 게임을 하는 행동이 네가 원하는 좋은 성적을 얻고 친구들에게 인정받는 데 정말로 도움이 되니?'라고 질문하였다.",
+        "ask": "지훈이의 기저에 깔린 글래서(W. Glasser)의 기본 욕구의 명칭을 쓰고, 상담교사가 사용한 질문이 WDEP 모델 중 어느 단계에 해당하는지 기호와 명칭을 서술하시오.",
+        "keywords": [
+          "힘의 욕구(성취의 욕구)",
+          "E단계",
+          "평가(Evaluation)"
+        ],
+        "feedback": "기본 욕구 5가지랑 WDEP 단계는 임용 단골손님인데 설마 아직도 헷갈리는 건 아니지? E단계에서 내담자가 스스로 자기 행동의 비효율성을 직면하게 만드는 게 현실치료의 핵심이야. 대충 넘기지 말고 확실히 외워둬."
+      },
+      {
+        "theory": "인지치료 (A. Beck)",
+        "case": "수미(고2, 여)는 최근 모의고사 성적이 떨어지자 '이번 시험을 망쳤으니 내 인생은 끝났어. 친구들도 나를 멍청하다고 무시할 게 뻔해'라며 극심한 우울감을 호소한다. 상담교사는 수미에게 '수미야, 친구들이 너를 무시할 것이라는 구체적인 증거가 있니? 그리고 네 인생이 끝났다는 생각이 사실이라면, 그것이 너에게 어떤 의미를 지니니?'라고 물으며 수미의 기저에 있는 신념을 탐색하기 시작했다.",
+        "ask": "수미가 보이는 인지적 오류의 명칭을 쓰고, 상담교사가 수미의 기저에 있는 신념을 파악하기 위해 사용한 탐색 기법의 명칭을 서술하시오.",
+        "keywords": [
+          "임의적 추론(또는 파국화/독심술)",
+          "하향 화살표 기법",
+          "핵심 신념"
+        ],
+        "feedback": "표면적인 자동적 사고에서 밑바닥의 핵심 신념으로 파고들어가는 '하향 화살표 기법'은 기출 지문에 그대로 나왔던 거야. 인지적 오류 명칭들도 상황에 맞춰 정확하게 뽑아낼 수 있게 훈련해. 눈대중으로 풀면 실전에서 다 틀린다."
+      },
+      {
+        "theory": "해결중심 단기상담",
+        "case": "은영(고1, 여)은 오랜 기간 따돌림을 당해 학교에 오는 것이 지옥 같고 다 포기하고 싶다고 눈물을 흘린다. 상담교사는 '은영이가 포기하고 싶을 만큼 매일매일이 고통스럽고 힘들었을 텐데, 그래도 오늘 이렇게 포기하지 않고 학교에 나와 상담실 문을 두드릴 수 있었던 힘은 어디서 나온 걸까?'라고 질문하였다.",
+        "ask": "상담교사가 은영이에게 사용한 해결중심상담의 질문 기법 명칭을 쓰고, 이 질문을 통해 내담자에게 기대할 수 있는 상담의 효과를 서술하시오.",
+        "keywords": [
+          "대처질문",
+          "내적 자원 자각",
+          "통제감(희망) 부여"
+        ],
+        "feedback": "절망에 빠져 있는 내담자한테 무턱대고 기적질문부터 던질래? 견뎌낸 힘을 찾아주는 '대처질문'이 먼저 들어가야 내담자가 자기 안의 자원을 자각할 거 아냐. 해결중심의 철학이 뭔지 근본부터 다시 생각해."
+      },
+      {
+        "theory": "형태주의(게슈탈트) 상담",
+        "case": "영호(중3, 남)는 부모님이 매일 밤 크게 다투실 때마다 심한 불안을 느낀다. 하지만 영호는 부모님에게 화를 내거나 멈춰달라고 말하는 대신, '내가 공부를 못해서 엄마 아빠가 싸우는 거야, 다 내 잘못이야'라며 자신의 머리를 세게 때리는 자해 행동을 반복하고 있다.",
+        "ask": "영호가 환경(부모님)과 상호작용하는 과정에서 겪고 있는 접촉경계 혼란 기제의 명칭을 쓰고, 해당 기제가 형성되는 과정을 영호의 사례에 근거하여 서술하시오.",
+        "keywords": [
+          "반전(Retroflection)",
+          "외부(타인)를 향한 분노",
+          "자기 자신에게로 방향을 돌림"
+        ],
+        "feedback": "타인이나 환경에게 표출해야 할 에너지가 자기 자신에게 돌아오는 '반전' 메커니즘을 정확히 파악해야 자해 학생을 제대로 이해할 수 있어. 내사나 투사 같은 다른 방어기제랑 헷갈리면 답안지 방향이 완전히 산으로 가니까 주의해."
+      },
+      {
+        "theory": "가족상담 (보웬 & 사티어 통합)",
+        "case": "부부 갈등이 심한 태호네 가족은, 엄마와 아빠가 직접 대화하지 않고 항상 아들인 태호의 성적 문제를 평계 삼아 대화하며 긴장을 회피한다. 상담교사가 사티어의 빙산 탐색을 적용해 본 결과, 겉으로는 반항적인 태호의 내면 깊은 곳에는 부모님으로부터 온전한 사랑과 인정을 받고 싶어 하는 간절한 바람이 있음을 확인했다.",
+        "ask": "보웬(M. Bowen)의 이론에 근거하여 부모가 태호를 끌어들여 형성한 역기능적 관계 패턴의 명칭을 쓰고, 사티어(V. Satir)의 빙산 탐색에 근거하여 태호의 내면 깊은 곳에 있는 심리적 욕구의 명칭(2글자)을 쓰시오.",
+        "keywords": [
+          "삼각관계(Triangulation)",
+          "열망(Yearnings)",
+          "불안 감소"
+        ],
+        "feedback": "가족치료는 2~3개 이론을 하나로 묶어서 내는 통합형 문제가 대세야. 보웬의 '삼각관계'랑 사티어 빙산 밑바닥의 '열망' 같은 핵심 개념은 눈 감고도 툭 튀어나와야 해. 이론 섞여 나온다고 지레 겁먹지 마."
+      },
+      {
+        "theory": "정신분석 상담 및 상담 윤리",
+        "case": "최 교사는 최근 상담 중인 남학생의 건방진 태도를 볼 때마다 이유 없이 분노가 치밀어 오르는데, 알고 보니 그 학생이 과거 자신에게 상처를 준 전 남자친구와 매우 닮았다는 것을 깨달았다. 한편, 이 학생은 심각한 우울감을 호소하며 구체적인 자살 계획을 세우고 있다고 털어놓으면서, 이 사실을 부모님이나 학교에 절대 비밀로 해달라고 간곡히 부탁하고 있다.",
+        "ask": "최 교사가 남학생에게 느끼는 감정 상태를 지칭하는 정신분석 용어를 쓰고, 이 학생의 비밀보장 요구에 대한 상담교사의 윤리적 대처 방안을 키치너의 윤리 원칙을 포함하여 서술하시오.",
+        "keywords": [
+          "역전이(Countertransference)",
+          "비밀보장의 한계(예외)",
+          "선행성의 원칙(생명 보호)"
+        ],
+        "feedback": "상담자가 자기 미해결 과제 때문에 내담자한테 감정 이입하는 '역전이'는 상담 망치는 지름길이야. 그리고 자살 위기인데 비밀보장 원칙만 붙들고 있을래? '비밀보장의 예외' 조건은 토씨 하나 안 틀리고 외우고 있어야 실전에서 쓸 수 있어."
+      },
+      {
+        "theory": "인간중심 상담 (C. Rogers)",
+        "case": "지아(중1, 여)는 친구들과 놀기를 좋아하고 춤추는 것을 사랑하지만, 엄마는 지아가 수학 100점을 받아올 때만 안아주고 칭찬한다. 지아는 엄마의 사랑을 잃지 않기 위해 억지로 수학 공부만 매달리지만, 춤을 추고 싶은 자신의 진짜 마음을 억누르느라 늘 원인 모를 두통과 극심한 불안에 시달리고 있다.",
+        "ask": "엄마의 양육 태도를 설명하는 로저스의 이론적 개념을 쓰고, 이러한 환경으로 인해 지아가 겪게 되는 심리적 부적응의 형성 과정을 서술하시오.",
+        "keywords": [
+          "가치의 조건화",
+          "유기체적 경험",
+          "자기개념과 경험의 불일치"
+        ],
+        "feedback": "로저스의 '가치의 조건화'가 어떻게 내담자의 '자기개념'과 '유기체적 경험'을 불일치하게 만들어서 불안을 낳는지, 그 인과관계를 문장으로 깔끔하게 뽑아내는 연습 좀 해라. 키워드만 둥둥 떠다니는 답안은 점수 다 날아간다."
+      },
+      {
+        "theory": "교류분석 (TA)",
+        "case": "진수(고2, 남)는 평소에는 논리적이고 차분하지만, 시험 기간만 되면 '너는 무조건 1등을 해야만 해, 실패하면 끝이야'라는 아버지의 목소리가 환청처럼 들려오며 극도의 공포에 빠져 정상적인 사고를 하지 못한다. 이로 인해 쉬운 문제도 풀지 못하고 시험을 망치게 된다.",
+        "ask": "교류분석 이론에 근거하여, 진수의 합리적 판단을 담당하는 어른 자아(A)가 부모 자아(P)의 강압적인 메시지에 의해 침범당해 제 기능을 하지 못하는 상태의 명칭을 쓰고, 이 상태가 진수의 현실 적응에 미치는 영향을 서술하시오.",
+        "keywords": [
+          "혼합(또는 오염, Contamination)",
+          "어른 자아(A)의 기능 상실",
+          "현실 검증력 손상"
+        ],
+        "feedback": "TA에서 자아상태 간의 경계가 무너지는 '혼합(오염)' 개념 모르면 구조분석은 시작도 못 해. 어른 자아(A)가 부모 자아(P)의 편견이나 맹신에 침범당하면 현실 검증이 안 된다는 걸 정확하게 짚어내야 한다."
+      },
+      {
+        "theory": "진로상담 (크롬볼츠 & 사회인지진로이론 통합)",
+        "case": "승환이는 원래 수의사가 꿈이었으나, 우연히 참가한 학교 영상 제작 동아리에서 편집의 매력을 느껴 영상 감독으로 꿈을 바꾸었다. 하지만 승환이는 '과연 내가 영상 편집을 배워서 성공할 수 있을까? 기껏 배웠는데 취업이 안 되면 어쩌지?'라며 선뜻 진로를 결정하지 못하고 있다.",
+        "ask": "크롬볼츠의 이론에 근거하여 우연한 사건을 진로 발달에 긍정적으로 활용하는 기술의 명칭을 쓰고, 사회인지진로이론(SCCT)에 근거하여 승환이가 진로 선택을 주저하는 원인이 되는 인지적 변인의 명칭을 쓰시오.",
+        "keywords": [
+          "계획된 우연(Planned Happenstance)",
+          "결과기대(Outcome Expectations)",
+          "SCCT 인지적 변인"
+        ],
+        "feedback": "진로 쪽은 크롬볼츠의 '계획된 우연'이랑 SCCT의 '자기효능감', '결과기대'가 매년 로테이션 돌며 나오는 0순위야. '내가 이걸 하면 좋은 결과가 올까?'라고 의심하는 건 결과기대의 부족이라는 걸 명확히 구분해 놔."
+      },
+      {
+        "theory": "합리적 정서행동치료 (REBT)",
+        "case": "민우는 수업 시간 발표 중 한 번 더듬은 것을 두고 '나는 발표를 완전히 망쳤어. 나는 구제 불능이고 아무짝에도 쓸모없는 멍청이야'라고 자책하며 다음 발표 거부한다. 상담교사는 민우에게 '발표를 한 번 실수한 것이 네가 아무짝에도 쓸모없는 인간이라는 것을 어떻게 증명해 주니? 그 증거를 찾아볼까?'라고 질문하였다.",
+        "ask": "민우가 보이고 있는 REBT 모델의 B(신념) 단계의 명칭을 쓰고, 상담교사가 민우의 생각을 바꾸기 위해 사용한 논박(Disputation)의 구체적인 유형을 서술하시오.",
+        "keywords": [
+          "비합리적 신념(Irrational Belief)",
+          "경험적 논박(또는 논리적 논박)",
+          "증거 확인"
+        ],
+        "feedback": "REBT에서 논박 유형 구분하는 거 은근히 많이들 틀리더라. '증거가 어딨니?'라고 묻는 건 경험적/논리적 논박이고, '그게 네 목표 달성에 도움이 되니?'라고 묻는 건 기능적(실용적) 논박이야. 제발 논박 종류 똑바로 구분하자."
+      }
+    ];
+
+    let currentQ = null;
+    let scores = [];
+    let studyCount = 0;
+    let chartInstance = null;
+
+    // 초기화 및 데이터 로드
+    function init() {
+        const savedScores = localStorage.getItem('rs_scores');
+        const savedCount = localStorage.getItem('study_count');
+        if(savedScores) scores = JSON.parse(savedScores);
+        if(savedCount) studyCount = parseInt(savedCount);
+        document.getElementById('study-count').innerText = studyCount;
+    }
+
+    // 로그인 접속 로직
+    function login() {
+        if(document.getElementById('pwd').value === '2027pass') {
+            document.getElementById('login-sec').classList.add('hide');
+            document.getElementById('main-sec').classList.remove('hide');
+            init();
+            renderChart();
+            loadQuestion();
+        } else {
+            alert('비밀번호가 일치하지 않습니다.');
+        }
+    }
+
+    // 로그아웃
+    function logout() {
+        document.getElementById('main-sec').classList.add('hide');
+        document.getElementById('login-sec').classList.remove('hide');
+        document.getElementById('pwd').value = '';
+    }
+
+    // 문제 무작위 로드
+    function loadQuestion() {
+        document.getElementById('answer').value = '';
+        document.getElementById('feedback').classList.add('hide');
+        document.getElementById('submit-btn').disabled = false;
+
+        const idx = Math.floor(Math.random() * questionBank.length);
+        currentQ = questionBank[idx];
+
+        document.getElementById('q-theory').innerText = currentQ.theory;
+        document.getElementById('q-case').innerText = currentQ.case;
+        document.getElementById('q-ask').innerText = currentQ.ask;
+    }
+
+    // 채점 엔진 (키워드 전체 필수 포함 로직)
+    function grade() {
+        const text = document.getElementById('answer').value.trim();
+        if(text.length < 5) return alert("최소한 한 줄 이상 서술하세요.");
+
+        document.getElementById('submit-btn').disabled = true;
+
+        const required = currentQ.keywords;
+        let matched = [];
+        // 텍스트 검사를 위해 띄어쓰기 제거 및 소문자 변환 (유연한 채점)
+        const cleanAnswer = text.replace(/\s+/g, '').toLowerCase();
+
+        required.forEach(kw => {
+            // '또는', 괄호, 슬래시 등으로 묶인 단어들을 분리해서 하나라도 맞으면 정답 처리
+            const parts = kw.replace(/또는/g, '').split(/[\(\)\/,]+/).map(p => p.trim()).filter(p => p.length > 0);
+            
+            let isMatch = false;
+            for(let p of parts) {
+                const cleanP = p.replace(/\s+/g, '').toLowerCase();
+                if(cleanAnswer.includes(cleanP)) {
+                    isMatch = true;
+                    break;
+                }
+            }
+            if(isMatch) matched.push(kw);
+        });
+
+        // 점수 계산 (부분 점수 부여)
+        const score = Math.floor((matched.length / required.length) * 100);
+        
+        // 성적 및 학습횟수 저장
+        scores.push(score);
+        if(scores.length > 20) scores.shift(); // 최근 20회분 유지
+        studyCount++;
+        
+        localStorage.setItem('rs_scores', JSON.stringify(scores));
+        localStorage.setItem('study_count', studyCount);
+        document.getElementById('study-count').innerText = studyCount;
+
+        renderChart(); // 차트 즉시 갱신
+
+        // 피드백 패널 표시 (ADHD 직관성: 아이콘 및 선명한 색상 대비)
+        document.getElementById('feedback').classList.remove('hide');
+        document.getElementById('score').innerText = score;
+
+        const kwHtml = required.map(kw => {
+            const has = matched.includes(kw);
+            return `<span style="display:inline-block; margin: 4px 8px 4px 0; padding: 6px 12px; border-radius: 6px; font-weight: 700; color: ${has ? '#047857' : '#6b7280'}; background: ${has ? '#d1fae5' : '#f3f4f6'}; border: 1px solid ${has ? '#34d399' : '#e5e7eb'};">${has ? '🟢' : '⚫'} ${kw}</span>`;
+        }).join('');
+        document.getElementById('kw-list').innerHTML = kwHtml;
+
+        const harshEl = document.getElementById('feedback-harsh');
+        const goodEl = document.getElementById('feedback-good');
+
+        if(score === 100) {
+            harshEl.classList.add('hide');
+            goodEl.classList.remove('hide');
+        } else {
+            goodEl.classList.add('hide');
+            harshEl.classList.remove('hide');
+            // 찾지 못한 키워드를 분석하여 독설 생성
+            const missing = required.filter(k => !matched.includes(k));
+            let harshText = `<span style="font-size:24px;">🔴</span> <strong>감점 요인 (누락 키워드):</strong><br>채점관은 자선사업가가 아닙니다. <b>[${missing.join(', ')}]</b> 단어 없이 점수를 받을 생각은 버리십시오.<br><br>`;
+            if(currentQ.feedback) {
+                harshText += `<div style="padding: 12px; background: #fee2e2; border-radius: 6px; color: #991b1b;"><strong>[디렉터의 뼈때리는 피드백]</strong><br>${currentQ.feedback}</div>`;
+            }
+            harshEl.innerHTML = harshText;
+        }
+    }
+
+    // Chart.js RS 지수 차트
+    function renderChart() {
+        const ctx = document.getElementById('rsChart').getContext('2d');
+        if(chartInstance) chartInstance.destroy();
+
+        const labels = scores.length > 0 ? scores.map((_, i) => `${i+1}회`) : ['시작점'];
+        const data = scores.length > 0 ? scores : [0];
+
+        chartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: '합격 RS 지수',
+                    data: data,
+                    borderColor: '#2563eb',
+                    backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                    borderWidth: 4,
+                    pointBackgroundColor: '#fff',
+                    pointBorderColor: '#2563eb',
+                    pointBorderWidth: 2,
+                    pointRadius: 6,
+                    fill: true,
+                    tension: 0.2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, max: 100, grid: { color: 'rgba(0,0,0,0.05)' } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+    }
+</script>
+</body>
+</html>
