@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>본데의 마스터 클래스: 시장 진단 & 전략</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
+    <style>
+        :root {
+            --bg-body: #f3f4f6;
+            --bg-card: #ffffff;
+            --text-main: #1f2937;
+            --accent-blue: #1e3a8a;
+            --stroke: #e5e7eb;
+        }
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            margin: 0;
+            padding: 40px 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--stroke);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        h1, h2, h3 {
+            margin-top: 0;
+            color: var(--text-main);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            text-align: left;
+            padding: 16px;
+            border-bottom: 1px solid var(--stroke);
+            font-size: 16px;
+        }
+        th {
+            background-color: #f9fafb;
+            font-weight: 700;
+        }
+        .up { color: #10b981; font-weight: 800; }
+        .down { color: #ef4444; font-weight: 800; }
+
+        /* 프라딥 본데 리포트 전용 스타일 */
+        .bonde-report {
+            background-color: #fffaf0; /* 프리미엄 리포트 느낌의 따뜻한 배경 */
+            border-top: 6px solid #d97706; /* 강렬한 헤더 포인트 */
+            padding-top: 40px;
+        }
+        
+        .bonde-report h2 {
+            color: #b45309;
+            font-size: 28px;
+            border-bottom: 2px solid #fcd34d;
+            padding-bottom: 16px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        /* ⭐️ 모든 설명을 검정색 굵은 글씨로 표시하라는 지시사항 반영 ⭐️ */
+        .bonde-content p {
+            color: #000000;
+            font-weight: 900; /* 확실한 bold (검정색 굵은 글씨) */
+            font-size: 19px;
+            line-height: 1.8;
+            margin-bottom: 16px;
+        }
+
+        .strategy-box {
+            background: #ffffff;
+            border: 2px solid #fcd34d;
+            padding: 24px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+        
+        .strategy-title {
+            font-size: 22px;
+            color: #92400e;
+            margin-bottom: 16px;
+            font-weight: 900;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .risk-box {
+            background: #fef2f2;
+            border: 2px solid #fca5a5;
+            padding: 24px;
+            border-radius: 8px;
+            margin-top: 40px;
+        }
+        .risk-title {
+            color: #b91c1c;
+            font-size: 22px;
+            font-weight: 900;
+            margin-bottom: 16px;
+        }
+
+        .hero-img {
+            width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- 1. 가상의 주식 데이터 표 -->
+    <div class="card">
+        <h2>📊 실시간 모멘텀 주식 스크리너</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>심볼</th>
+                    <th>기업명</th>
+                    <th>현재가</th>
+                    <th>변동률</th>
+                    <th>거래량 증가율</th>
+                    <th>상태</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>NVDA</td>
+                    <td>엔비디아</td>
+                    <td>$870.52</td>
+                    <td class="up">+4.2%</td>
+                    <td>350%</td>
+                    <td>🚀 EP 셋업 완료</td>
+                </tr>
+                <tr>
+                    <td>SMCI</td>
+                    <td>슈퍼마이크로</td>
+                    <td>$950.10</td>
+                    <td class="up">+12.5%</td>
+                    <td>420%</td>
+                    <td>⚡ MB 돌파 중</td>
+                </tr>
+                <tr>
+                    <td>AMD</td>
+                    <td>어드밴스드 마이크로</td>
+                    <td>$160.25</td>
+                    <td class="down">-1.5%</td>
+                    <td>-50%</td>
+                    <td>🎾 Dry-up 구간</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 2. 본데의 시장 리포트 (요구사항 반영) -->
+    <div class="card bonde-report">
+        <h2>[프라딥 본데의 실시간 시장 리포트]</h2>
+        
+        <div class="bonde-content">
+            <!-- 1. 시장 진단 -->
+            <p style="font-size: 24px; color: #b45309; border-left: 4px solid #b45309; padding-left: 12px;">1. 시장 진단 (Market Commentary)</p>
+            <p>[현재 시장 맥박]: "4월 8일 팔로우스루 데이(FTD) 이후 시장의 체력이 확인되었습니다. 지금은 황소(Bull)가 주도권을 쥔 구간입니다. 거래량이 터지며 피벗을 뚫는 9M EP(에피소딕 피봇) 종목은 기관의 거대 자금이 유입되었다는 명확한 증거입니다. 겁쟁이처럼 망설이지 말고 원칙대로 진입하십시오."</p>
+
+            <!-- 2. 핵심 전략 가이드 -->
+            <p style="font-size: 24px; color: #b45309; border-left: 4px solid #b45309; padding-left: 12px; margin-top: 50px; margin-bottom: 20px;">2. 본데의 3대 핵심 전략 가이드 (Technical Guide)</p>
+            
+            <div class="strategy-box">
+                <div class="strategy-title"><span>🚀</span> 전략 1. EP(Episodic Pivot)</div>
+                <p>"강력한 촉매제(실적 가속, 신제품 등)와 함께 갭상승한 종목은 주가의 경로를 영구적으로 바꿉니다. $196대의 엔비디아처럼 거래량이 실린 갭을 주목하세요."</p>
+            </div>
+
+            <div class="strategy-box">
+                <div class="strategy-title"><span>⚡</span> 전략 2. MB(Momentum Burst)</div>
+                <p>"3~20일간 좁은 박스권(Tightness)을 형성하다가 4% 이상 거래량이 동반하며 돌파하는 종목을 사냥하세요. 단기 안타를 치기에 가장 완벽한 구간입니다."</p>
+            </div>
+
+            <div class="strategy-box">
+                <div class="strategy-title"><span>🎾</span> 전략 3. Delayed Reaction</div>
+                <p>"당일 갭이 너무 크다면 추격하지 마세요. 며칠간 거래량이 먼지처럼 마르는(Dry-up) '지연 반응' 구간을 기다렸다가 2차 돌파 시 비중을 실으세요."</p>
+            </div>
+
+            <!-- 3. 리스크 관리 독설 -->
+            <div class="risk-box">
+                <div class="risk-title">⚠️ 3. 리스크 관리 독설 (Strict Rules)</div>
+                <p style="color: #7f1d1d;">"손절 -2.5%는 타협 불가능한 당신의 생명줄입니다."</p>
+                <p style="color: #7f1d1d;">"수익은 기다림의 대가이며, 매수는 확인의 결과입니다. 물타기는 계좌 파멸의 지름길임을 명심하십시오."</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. 황소 이미지 섹션 (요구사항 반영) -->
+    <div style="margin-top: 50px; text-align: center; margin-bottom: 20px;">
+        <h3 style="color: #4b5563; margin-bottom: 20px; font-size: 22px;">🐂 강세장(Bull Market)의 압도적인 기운을 받아가십시오</h3>
+        <!-- AI 생성 고보결님 분위기 + 황소 이미지 -->
+        <img src="bull_market_ambassador.png" alt="황소와 함께한 마켓 앰버서더" class="hero-img">
+    </div>
+</div>
+
+</body>
+</html>
