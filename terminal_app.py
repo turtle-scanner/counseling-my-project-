@@ -83,30 +83,46 @@ if check_password():
         </style>
     """, unsafe_allow_html=True)
 
-    # 실시간 데이터 가져오기 함수
+    # 실시간 데이터 가져오기 함수 (안정성 강화 버전)
+    @st.cache_data(ttl=60) # 60초간 캐시 유지하여 속도 및 안정성 보장
     def get_realtime_price(tickers):
         prices = {}
-        try:
-            data = yf.download(tickers, period="1d", interval="1m", group_by='ticker', progress=False)
-            for ticker in tickers:
-                if len(tickers) == 1:
-                    target_data = data
-                else:
-                    target_data = data[ticker]
+        for ticker in tickers:
+            try:
+                # 개별 종목별로 시도하여 전체 에러 방지
+                stock = yf.Ticker(ticker)
                 
-                if not target_data.empty:
-                    current = target_data['Close'].iloc[-1]
-                    prev_close = target_data['Open'].iloc[0]
-                    change = ((current - prev_close) / prev_close) * 100
+                # 가벼운 데이터 우선 시도 (fast_info)
+                info = stock.fast_info
+                current = info['last_price']
+                prev_close = info['previous_close']
+                
+                # 데이터가 없는 경우 히스토리로 대체 시도
+                if current is None or pd.isna(current):
+                    hist = stock.history(period="2d")
+                    if len(hist) >= 1:
+                        current = hist['Close'].iloc[-1]
+                        prev_close = hist['Close'].iloc[0] if len(hist) > 1 else current
+                    else:
+                        current, prev_close = 0, 0
+                
+                if current > 0:
+                    change = ((current - prev_close) / prev_close * 100) if prev_close > 0 else 0
+                    
+                    # 화폐 단위 및 포맷팅
+                    if "." in ticker: # 한국 종목 (042700.KS 등)
+                        price_str = f"{int(current):,}"
+                    else: # 미국 종목
+                        price_str = f"${current:,.2f}"
+                        
                     prices[ticker] = {
-                        "price": f"{current:,.2f}" if "." in ticker else f"{int(current):,}",
-                        "change": f"{change:+.21}%"
+                        "price": price_str,
+                        "change": f"{change:+.2f}%"
                     }
                 else:
-                    prices[ticker] = {"price": "N/A", "change": "0.00%"}
-        except:
-            for ticker in tickers:
-                prices[ticker] = {"price": "Error", "change": "0.00%"}
+                    prices[ticker] = {"price": "-", "change": "0.00%"}
+            except:
+                prices[ticker] = {"price": "-", "change": "0.00%"}
         return prices
 
     # --- 시장 스캔 마스터 리스트 (미국/한국 핵심 150개) ---
